@@ -324,13 +324,13 @@ h_u->Draw("P");          //draw hist_2 first as it has a larger range
 h_d->Draw("same P");
 h_u->SetTitle("Up Down Funk");
 
-h_diff = h_u;
-h_diff->Add(h_d,-1);
-
-//h_diff=h_u-h_d;
-//TCanvas *Diff=new TCanvas("Diff","Up Minus Down");
-h_diff->SetMarkerColor(13);
-h_diff->Draw("P");
+// h_diff = h_u;
+// h_diff->Add(h_d,-1);
+//
+// //h_diff=h_u-h_d;
+// //TCanvas *Diff=new TCanvas("Diff","Up Minus Down");
+// h_diff->SetMarkerColor(13);
+// h_diff->Draw();
 
 
 
