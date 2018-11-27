@@ -24,9 +24,9 @@ using namespace std;
 
 
 
-void test_analysisv3(){
+void test_analysisv3_Aike(){
   //cout<<"i"<<endl;
-	TFile *f=new TFile("MuonMeasurementFinal.root"); // Opens the root file
+	TFile *f=new TFile("MuonData15.11-04.12.2018.root"); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
   TH1F* h_u = new TH1F("h_u","Up", 80,0,8000);
@@ -87,7 +87,7 @@ void test_analysisv3(){
 	tr->SetBranchAddress("STDC_8_15",&STDC_E08);
 	tr->SetBranchAddress("STDC_8_SUM",&STDC_8_SUM);
 
-	
+
 	tr->SetBranchAddress("FTDC_9_0",&FTDC_9_0);
 	tr->SetBranchAddress("FTDC_9_1",&FTDC_9_1);
 	tr->SetBranchAddress("FTDC_9_2",&FTDC_9_2);
@@ -106,7 +106,7 @@ void test_analysisv3(){
     tr->GetEntry(i);
   //int countm =0;
   //cout<<"i"<<endl;
-  //Indentify the last layer the muon passed through as layer_pass. 
+  //Indentify the last layer the muon passed through as layer_pass.
   //Muon decays between layer_pass and layer_pass+1
   //Discard events that dacays before the first layer or pass through the fifth layer
 
@@ -167,8 +167,8 @@ void test_analysisv3(){
     //}
     //else{cout<<layer_pass<<endl;}
   //Indentify the layer of electron hits
-  //Reject events with more than one hit or no hit 
-  //cout<<"okay"<<endl; 
+  //Reject events with more than one hit or no hit
+  //cout<<"okay"<<endl;
     int layer_hit=0;
     int uptime=-1;
     int downtime=-1;
@@ -265,12 +265,12 @@ void test_analysisv3(){
       //cout<<time<<endl;
       //cout<<i<<endl;
       //cout<<layer_hit<<" "<<layer_pass<<endl;
-      h_u->Fill(2.0*uptime);
+      h_u->Fill(2.0/1000*uptime);
     }
-    
+
     if(downtime>100&&uptime<0  && layer_pass != 5 && layer_pass != 0){
       //cout<<time<<endl;
-      h_d->Fill(2.0*downtime);
+      h_d->Fill(2.0/1000*downtime);
     }
 
   }
@@ -284,16 +284,17 @@ void test_analysisv3(){
   myfit->SetParameter(3,0.04);
   myfit->SetParameter(4,0);
   myfit->SetParameter(5,0);
-  
+
   //cout<<"where?"<<endl;
-  TF1 *myfitd = new TF1("myfitd","[5]*x+[0]*exp(-x/[1])*(sin([3]*x+[4]))+[2]", 0, 8000);
+	//[0]N,[1]tau,[2]A,[3]ang freq,[4]phase,[5]offset
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 0, 8000);
   myfitd->SetParameter(0,100);
   myfitd->SetParameter(1,2000);
-  myfitd->SetParameter(2,0);
+  myfitd->SetParameter(2,10);
   myfitd->SetParameter(3,0.04);
-  myfitd->SetParameter(4,0);
+	myfitd->SetParameter(4,0);
   myfitd->SetParameter(5,0);
- // cout<<"here?"<<endl;  
+ // cout<<"here?"<<endl;
   //TF1 *f1 = new TF1("f1","[0]*x*sin([1]*x)",-3,3);
   //cout<<countm<<endl;
   result->Divide(3,1);
@@ -309,8 +310,8 @@ void test_analysisv3(){
   h_d->Draw("E");
   result->cd(3);
   //TH1* hist_diff = (TH1*) h_u->Clone("hist_diff");
-  TH1* h_uc = (TH1*) h_u->Clone("hist_diff");
-  TH1* h_dc = (TH1*) h_d->Clone("hist_diff");
+  TH1* h_uc = (TH1*) h_u->Clone("h_uc");
+  TH1* h_dc = (TH1*) h_d->Clone("h_dc");
   TF1 *fa1 = new TF1("fa1","-1",0,8000);
   h_dc -> Add(fa1,6);
   h_uc -> Add(fa1,4);
@@ -318,7 +319,7 @@ void test_analysisv3(){
   hist_diff->Add(h_dc, -1);
   //hist_diff->Rebin(2);
   hist_diff->Fit("myfitd");
-  hist_diff->Draw("E");  
+  hist_diff->Draw("E");
 
 /*
 	for (int i=0;i<tr->GetEntries();i++){          // This will loop over all of the recorded events in chronological order
@@ -357,26 +358,3 @@ void test_analysisv3(){
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
