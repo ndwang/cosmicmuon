@@ -25,7 +25,7 @@ using namespace std;
 
 void test_analysisJoy(){
 
-	TFile *f=new TFile("2018-07-10_MagRun_01.root"); // Opens the root file
+        TFile *f=new TFile("2018-07-10_MagRun_01.root");//"MuonData15.11-04.12.2018.root");//"2018-07-10_MagRun_01.root"); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
   TH1F *h_u = new TH1F("h_u","Up", 600,0,600);
@@ -324,13 +324,13 @@ h_u->Draw("P");          //draw hist_2 first as it has a larger range
 h_d->Draw("same P");
 h_u->SetTitle("Up Down Funk");
 
-//h_diff = h_u;
-//h_diff->Add(h_d,-1);
+h_diff = h_u;
+h_diff->Add(h_d,-1);
 
 //h_diff=h_u-h_d;
 //TCanvas *Diff=new TCanvas("Diff","Up Minus Down");
-//h_diff->SetMarkerColor(13);
-//h_diff->Draw("P");
+h_diff->SetMarkerColor(13);
+h_diff->Draw("P");
 
 
 
