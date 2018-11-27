@@ -26,12 +26,12 @@ using namespace std;
 
 void test_analysisv3_Aike(){
   //cout<<"i"<<endl;
-	TFile *f=new TFile("MuonData15.11-04.12.2018.root"); // Opens the root file
+	TFile *f=new TFile("2018-07-10_MagRun_01.root"); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
-  TH1F* h_u = new TH1F("h_u","Up", 80,0,8000);
-	TH1F* h_d = new TH1F("h_d","Down",80,0,8000);
-  TH1F *h1 = new TH1F("h1","Diff", 4000,0,4000);
+  TH1F* h_u = new TH1F("h_u","Up", 80,0,8);
+	TH1F* h_d = new TH1F("h_d","Down",80,0,8);
+  TH1F *h1 = new TH1F("h1","Diff", 80,0,8);
 
 //for (int event=0,event<tr->GetEntries();event++){
 
@@ -277,21 +277,18 @@ void test_analysisv3_Aike(){
   Double_t nu = h_u->GetEntries();
   Double_t nd = h_d->GetEntries();
   h_d -> Scale(nu/nd);
-  TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])*(1+0*[2]*cos([3]*x+[4]))+[5]", 0, 8000);
+  TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
   myfit->SetParameter(0,100);
-  myfit->SetParameter(1,2000);
-  myfit->SetParameter(2,10);
-  myfit->SetParameter(3,0.04);
-  myfit->SetParameter(4,0);
-  myfit->SetParameter(5,0);
+  myfit->SetParameter(1,2);
+  myfit->SetParameter(2,0);
 
   //cout<<"where?"<<endl;
 	//[0]N,[1]tau,[2]A,[3]ang freq,[4]phase,[5]offset
-  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 0, 8000);
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
   myfitd->SetParameter(0,100);
-  myfitd->SetParameter(1,2000);
+  myfitd->SetParameter(1,2);
   myfitd->SetParameter(2,10);
-  myfitd->SetParameter(3,0.04);
+  myfitd->SetParameter(3,0.6);
 	myfitd->SetParameter(4,0);
   myfitd->SetParameter(5,0);
  // cout<<"here?"<<endl;
@@ -312,13 +309,13 @@ void test_analysisv3_Aike(){
   //TH1* hist_diff = (TH1*) h_u->Clone("hist_diff");
   TH1* h_uc = (TH1*) h_u->Clone("h_uc");
   TH1* h_dc = (TH1*) h_d->Clone("h_dc");
-  TF1 *fa1 = new TF1("fa1","-1",0,8000);
+  TF1 *fa1 = new TF1("fa1","-1",0,8);
   h_dc -> Add(fa1,6);
   h_uc -> Add(fa1,4);
   TH1* hist_diff = (TH1*) h_uc->Clone("hist_diff");
   hist_diff->Add(h_dc, -1);
   //hist_diff->Rebin(2);
-  hist_diff->Fit("myfitd");
+  hist_diff->Fit("myfitd","R");
   hist_diff->Draw("E");
 
 /*
