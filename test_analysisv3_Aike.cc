@@ -25,13 +25,14 @@ using namespace std;
 
 
 void test_analysisv3_Aike(){
-  //cout<<"i"<<endl;
+	//initialization
 	TFile *f=new TFile("MuonData15.11-04.12.2018.root"); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
+	result->Clear();
   TH1F* h_u = new TH1F("h_u","Up", 80,0,8);
 	TH1F* h_d = new TH1F("h_d","Down",80,0,8);
-  TH1F *h1 = new TH1F("h1","Diff", 80,0,8);
+  TH1F *h_diff = new TH1F("h_diff","Diff", 80,0,8);
 
 //for (int event=0,event<tr->GetEntries();event++){
 
@@ -42,30 +43,32 @@ void test_analysisv3_Aike(){
 	Short_t STDC_E03,STDC_E04,STDC_E05,STDC_E06,STDC_E07,STDC_E08,STDC_E09,STDC_E10,STDC_E11,STDC_E12;
 	Short_t STDC_8_SUM;
 
-// This section grabs the data from the branches in your root file and assigns them to a variable (change &a to the relevant PMT, or however you prefer to refer to your inputs)
-
-	tr->SetBranchAddress("ADC_1_0",&W03);
-	tr->SetBranchAddress("ADC_1_1",&W04);
-	tr->SetBranchAddress("ADC_1_2",&W05);
-	tr->SetBranchAddress("ADC_1_3",&W06);
-	tr->SetBranchAddress("ADC_1_4",&W07);
-	tr->SetBranchAddress("ADC_1_5",&W08);
-	tr->SetBranchAddress("ADC_1_6",&W09);
-	tr->SetBranchAddress("ADC_1_7",&W10);
-	tr->SetBranchAddress("ADC_1_8",&W11);
-	tr->SetBranchAddress("ADC_1_9",&W12);
-	//tr->SetBranchAddress("ADC_1_10",&E01);
-	//tr->SetBranchAddress("ADC_1_11",&E02);
-	tr->SetBranchAddress("ADC_2_0",&E03);
-	tr->SetBranchAddress("ADC_2_1",&E04);
-	tr->SetBranchAddress("ADC_2_2",&E05);
-	tr->SetBranchAddress("ADC_2_3",&E06);
-	tr->SetBranchAddress("ADC_2_4",&E07);
-	tr->SetBranchAddress("ADC_2_5",&E08);
-	tr->SetBranchAddress("ADC_2_6",&E09);
-	tr->SetBranchAddress("ADC_2_7",&E10);
-	tr->SetBranchAddress("ADC_2_8",&E11);
-	tr->SetBranchAddress("ADC_2_9",&E12);
+/////////////////////////////////////////
+// This section grabs the data from the branches in your root file
+// and assigns them to a variable (change &a to the relevant PMT, or however you prefer to refer to your inputs)
+/////////////////////////////////////////
+	tr->SetBranchAddress("ADC_1_0",&E03);
+	tr->SetBranchAddress("ADC_1_1",&W03);
+	tr->SetBranchAddress("ADC_1_2",&E04);
+	tr->SetBranchAddress("ADC_1_3",&W04);
+	tr->SetBranchAddress("ADC_1_4",&E05);
+	tr->SetBranchAddress("ADC_1_5",&W05);
+	tr->SetBranchAddress("ADC_1_6",&E06);
+	tr->SetBranchAddress("ADC_1_7",&W06);
+	tr->SetBranchAddress("ADC_1_8",&E07);
+	tr->SetBranchAddress("ADC_1_9",&W07);
+	tr->SetBranchAddress("ADC_1_10",&E08);
+	tr->SetBranchAddress("ADC_1_11",&W08);
+	tr->SetBranchAddress("ADC_2_0",&E09);
+	tr->SetBranchAddress("ADC_2_1",&W09);
+	tr->SetBranchAddress("ADC_2_2",&E10);
+	tr->SetBranchAddress("ADC_2_3",&W10);
+	tr->SetBranchAddress("ADC_2_4",&E11);
+	tr->SetBranchAddress("ADC_2_5",&W11);
+	tr->SetBranchAddress("ADC_2_6",&E12);
+	tr->SetBranchAddress("ADC_2_7",&W12);
+	// tr->SetBranchAddress("ADC_2_9",&E12);
+	// tr->SetBranchAddress("ADC_2_8",&E11);
 	//tr->SetBranchAddress("ADC_2_10",&E11);
 	//tr->SetBranchAddress("ADC_2_11",&E12);
 
@@ -120,25 +123,25 @@ void test_analysisv3_Aike(){
     Short_t layer_pass = 0;
 
 		//lower bound on muon energy to remove unphysical peak near 0
-    if((W03 > 70 && E03 > 68) ||(W04 > 160 && E04 > 224)){
+    if((W03 > 160 && E03 > 70) ||(W04 > 200 && E04 > 220)){
       layer_pass = 1;
     }
-    if( ((W05 > 220 && E05 > 81) ||(W06 > 200 && E06 > 73))){
+    if( ((W05 > 285 && E05 > 47) ||(W06 > 45 && E06 > 70))){
       if(layer_pass==1){
       layer_pass = 2;}
       else{layer_pass = 0;}
     }
-    if(((W07 > 47 && E07 > 45) ||(W08 > 285 && E08 > 45))){
+    if(((W07 > 276 && E07 > 50) ||(W08 > 100 && E08 > 100))){
       if(layer_pass==2){
       layer_pass = 3;}
       else{layer_pass = 0;}
     }
-    if( ((W09 > 70 && E09 > 36) ||(W10 > 45 && E10 > 88))){
+    if( ((W09 > 224 && E09 > 68) ||(W10 > 73 && E10 > 81))){
       if(layer_pass==3){
       layer_pass = 4;}
       else{layer_pass = 0;}
     }
-     if(((W11 > 50 && E11 > 17) ||(W12 > 276 && E12 > 120))){
+     if(((W11 > 45 && E11 > 45) ||(W12 > 88 && E12 > 36))){
       if(layer_pass==4){
       layer_pass = 5;}
       else{layer_pass = 0;}
@@ -264,49 +267,57 @@ void test_analysisv3_Aike(){
     }
 
   }
+
+////////////////////////////////////////
+//This section analyze and plot data
+////////////////////////////////////////
+	//rescale h_d
   Double_t nu = h_u->GetEntries();
   Double_t nd = h_d->GetEntries();
   h_d -> Scale(nu/nd);
+
+	//fitting function for h_u and h_d
   TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
   myfit->SetParameter(0,100);
-  myfit->SetParameter(1,2);
+  myfit->SetParameter(1,2); //[1] estimates muon lifetime
   myfit->SetParameter(2,0);
 
-  //cout<<"where?"<<endl;
-	//[0]N,[1]tau,[2]A,[3]ang freq,[4]phase,[5]offset
-  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
+	//fitting function for h_diff
+	//[0]N,[1]life time,[2]A,[3]ang freq,[4]phase,[5]offset
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 0, 8.0);
   myfitd->SetParameter(0,100);
   myfitd->SetParameter(1,2);
   myfitd->SetParameter(2,10);
   myfitd->SetParameter(3,0.6);
 	myfitd->SetParameter(4,0);
   myfitd->SetParameter(5,0);
- // cout<<"here?"<<endl;
-  //TF1 *f1 = new TF1("f1","[0]*x*sin([1]*x)",-3,3);
-  //cout<<countm<<endl;
-  result->Divide(3,1);
+
+	//plot three histograms
+  result->Divide(2,2);
+	//plot h_u with fitting
   result->cd(1);
   h_u->Fit("myfit");
   h_u->Draw("E");
-  //result->Update();
-  //h_d->Draw("same");
+	//plot h_d with fitting
   result->cd(2);
-  //h_u->Add(h_d, 1);
-  //h_d->SetLineColor(kRed);
   h_d->Fit("myfit");
   h_d->Draw("E");
+	//plot hist_diff with oscillation fitting
   result->cd(3);
-  //TH1* hist_diff = (TH1*) h_u->Clone("hist_diff");
-  TH1* h_uc = (TH1*) h_u->Clone("h_uc");
-  TH1* h_dc = (TH1*) h_d->Clone("h_dc");
-  TF1 *fa1 = new TF1("fa1","-1",0,8);
-  h_dc -> Add(fa1,6);
-  h_uc -> Add(fa1,4);
-  TH1* hist_diff = (TH1*) h_uc->Clone("hist_diff");
-  hist_diff->Add(h_dc, -1);
-  //hist_diff->Rebin(2);
-  hist_diff->Fit("myfitd","R");
-  hist_diff->Draw("E");
+//  TH1* hist_diff = (TH1*) h1->Clone("hist_diff");
+	h_diff->Add(h_u);
+  h_diff->Add(h_d, -1);
+  h_diff->Fit("myfitd","R");
+  h_diff->Draw("E");
+	gStyle->SetOptFit(1111);  //show more fitting information
+
+	// result->cd(4);
+	// TH1F* UpDown =new TH1F("h2","Up and Down", 80,0,8);
+	// h_u->setMarkerColor("k");
+	// UpDown->Add(h_u);
+	// h_d->setMarkerColor("red");
+	// UpDown->Add(h_d);
+	// UpDown->Draw("E");
 
 /*
 	for (int i=0;i<tr->GetEntries();i++){          // This will loop over all of the recorded events in chronological order
