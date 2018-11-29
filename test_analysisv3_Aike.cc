@@ -30,9 +30,20 @@ void test_analysisv3_Aike(){
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
 	result->Clear();
-  TH1F* h_u = new TH1F("h_u","Up", 80,0,8);
-	TH1F* h_d = new TH1F("h_d","Down",80,0,8);
-  TH1F *h_diff = new TH1F("h_diff","Diff", 80,0,8);
+
+
+	TH1F* h_u1 = new TH1F("h_u1","Up", 80,0,8);
+	TH1F* h_d1 = new TH1F("h_d1","Down",80,0,8);
+  TH1F* h_diff1 = new TH1F("h_diff1","Diff", 80,0,8);
+	TH1F* h_u2 = new TH1F("h_u2","Up", 80,0,8);
+	TH1F* h_d2 = new TH1F("h_d2","Down",80,0,8);
+  TH1F* h_diff2 = new TH1F("h_diff2","Diff", 80,0,8);
+	TH1F* h_u3 = new TH1F("h_u3","Up", 80,0,8);
+	TH1F* h_d3 = new TH1F("h_d3","Down",80,0,8);
+  TH1F* h_diff3 = new TH1F("h_diff3","Diff", 80,0,8);
+	TH1F* h_u4 = new TH1F("h_u4","Up", 80,0,8);
+	TH1F* h_d4 = new TH1F("h_d4","Down",80,0,8);
+  TH1F* h_diff4 = new TH1F("h_diff4","Diff", 80,0,8);
 
 //for (int event=0,event<tr->GetEntries();event++){
 
@@ -146,124 +157,55 @@ void test_analysisv3_Aike(){
       layer_pass = 5;}
       else{layer_pass = 0;}
     }
-  /*
-    if(Layer2 >= 310){
-      layer_pass++;
-      layer_pass = 2;
-    }
-    if(Layer3>=240){
-      layer_pass++;
-      layer_pass = 3;
-    }
-    if(Layer4>=70){
-      layer_pass++;
-      layer_pass = 4;
-    }
-    if(Layer5>=300){
-      layer_pass++;
-      layer_pass = 5;
-    }*/
-    //cout<<layer_pass<<endl;
-    //if(layer_pass == 5 || layer_pass == 0){
-    //  continue;
-    //}
-    //else{cout<<layer_pass<<endl;}
 
 
   //Indentify the layer of electron hits
   //Reject events with more than one hit or no hit
   //cout<<"okay"<<endl;
     int layer_hit=0;
-    int uptime=-1;
-    int downtime=-1;
-    int count = 0;
+    double uptime=0;
+    double downtime=0;
+    int countu = 0;
+		int countd = 0;
     int hit_time[10]={STDC_W03,STDC_W04,STDC_W05,STDC_W06,STDC_W07,STDC_W08,STDC_W09,STDC_W10,STDC_W11,STDC_W12};
     for(int i = 1; i <= 4; ++i){
       if(i == layer_pass){
         for(int j = 2*i-1; j >= 0; j--){
-          if(hit_time[j] < 4000){
-            uptime = hit_time[j];
+					if (j==0 || j==1)
+						continue;
+          if(hit_time[j] < 4000 && hit_time[j] > 2){
+            uptime += hit_time[j];
+						countu++;
           }
         }
         for(int j = 2*i; j<=9; j++){
-          if(hit_time[j] < 4000){
-            downtime = hit_time[j];
+          if(hit_time[j] < 4000 && hit_time[j] > 2){
+            downtime += hit_time[j];
+						countd++;
           }
         }
       }
     }
-    /*
-    if(STDC_W03!=4095){
-      //int flag = 0;
-      count ++;
-      time=STDC_W03;
-      //cout<<i<<" "<<time<<endl;
-      //cout<<time<<endl;
-      //if(layer_hit = 0){
-      //layer_hit = 1;}
-      //flat = 1;
-    }
-    if(STDC_W04!=4095){
-      count ++;
-      time=STDC_W04;
-      //cout<<i<<" "<<tim:e<<endl;
-      //if(layer_hit = 0){
-      //layer_hit = 1;}
-    }
-    if(STDC_W05!=4095){
-      count ++;
-      time=STDC_W05;
-      //cout<<time<<endl;
-      //if(layer_hit < 2){
-      //layer_hit = 2;}
-    }
-    if(STDC_W06!=4095){
-      count ++;//flag = 1;
-      time=STDC_W06;
-      //if(layer_hit < 2){
-      //layer_hit = 2;}
-    }
-    if(STDC_W07!=4095){
-      count ++;//flag = 1;
-      time=STDC_W07;
-      if(layer_hit < 3){
-      layer_hit = 3;}
-    }
-    if(STDC_W08!=4095){
-      count ++;
-      //flag = 1;
-      time=STDC_W08;
-      layer_hit = 3;
-    }
-    if(STDC_W09!=4095){
-      count ++;
-      //flag = 1;
-      time=STDC_W09;
-      layer_hit = 4;
-    }
-    if(STDC_W10!=4095){
-      count ++;//flag = 1;
-      time=STDC_W10;
-      layer_hit = 4;
-    }
 
-    if(STDC_W11!=4095){
-      count ++;//flag = 1;
-      time=STDC_W11;
-      layer_hit = 5;
+		uptime /= countu;
+		downtime /= countd;
+		//uptime>100&&downtime<1 &&
+    if(layer_pass != 5 && layer_pass != 0){
+			switch (layer_pass) {
+				case 1:	h_u1->Fill(2.0/1000*uptime);
+				case 2: h_u2->Fill(2.0/1000*uptime);
+				case 3: h_u3->Fill(2.0/1000*uptime);
+				case 4: h_u4->Fill(2.0/1000*uptime);
+			}
     }
-    if(STDC_W12!=4095){
-      count ++;//flag = 1;
-      time=STDC_W12;
-      layer_hit = 5;
-    }
-*/
-    if(uptime>100&&downtime<0 && layer_pass != 5 && layer_pass != 0){
-      h_u->Fill(2.0/1000*uptime);
-    }
-
-    if(downtime>100&&uptime<0  && layer_pass != 5 && layer_pass != 0){
-      h_d->Fill(2.0/1000*downtime);
+		//downtime>100&&uptime<1  &&
+    if( layer_pass != 5 && layer_pass != 0){
+			switch (layer_pass) {
+				case 1:	h_d1->Fill(2.0/1000*downtime);
+				case 2: h_d2->Fill(2.0/1000*downtime);
+				case 3: h_d3->Fill(2.0/1000*downtime);
+				case 4: h_d4->Fill(2.0/1000*downtime);
+			}
     }
 
   }
@@ -272,9 +214,9 @@ void test_analysisv3_Aike(){
 //This section analyze and plot data
 ////////////////////////////////////////
 	//rescale h_d
-  Double_t nu = h_u->GetEntries();
-  Double_t nd = h_d->GetEntries();
-  h_d -> Scale(nu/nd);
+   Double_t nu = h_u3->GetEntries();
+   Double_t nd = h_d3->GetEntries();
+   h_u3 -> Scale(nd/nu);
 
 	//fitting function for h_u and h_d
   TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
@@ -293,23 +235,38 @@ void test_analysisv3_Aike(){
   myfitd->SetParameter(5,0);
 
 	//plot three histograms
-  result->Divide(2,2);
+  result->Divide(3,2);
 	//plot h_u with fitting
   result->cd(1);
-  h_u->Fit("myfit");
-  h_u->Draw("E");
+  // h_u->Fit("myfit");
+  h_u2->Draw("E");
 	//plot h_d with fitting
   result->cd(2);
-  h_d->Fit("myfit");
-  h_d->Draw("E");
+  // h_d->Fit("myfit");
+  h_d2->Draw("E");
+
+	result->cd(4);
+	h_u3->Draw("E");
+	result->cd(5);
+	h_d3->Draw("E");
+
+	h_diff2->Add(h_u2);
+	h_diff2->Add(h_d2,-1);
+	h_diff3->Add(h_u3);
+	h_diff3->Add(h_d3,-1);
+	result->cd(3);
+	h_diff2->Draw("E");
+	result->cd(6);
+	h_diff3->Draw("E");
+
 	//plot hist_diff with oscillation fitting
-  result->cd(3);
+  // result->cd(3);
 //  TH1* hist_diff = (TH1*) h1->Clone("hist_diff");
-	h_diff->Add(h_u);
-  h_diff->Add(h_d, -1);
-  h_diff->Fit("myfitd","R");
-  h_diff->Draw("E");
-	gStyle->SetOptFit(1111);  //show more fitting information
+	// h_diff->Add(h_u);
+  // h_diff->Add(h_d, -1);
+  // h_diff->Fit("myfitd","R");
+  // h_diff->Draw("E");
+	// gStyle->SetOptFit(1111);  //show more fitting information
 
 	// result->cd(4);
 	// TH1F* UpDown =new TH1F("h2","Up and Down", 80,0,8);
