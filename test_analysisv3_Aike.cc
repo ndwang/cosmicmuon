@@ -26,7 +26,7 @@ using namespace std;
 
 void test_analysisv3_Aike(){
   //cout<<"i"<<endl;
-	TFile *f=new TFile("2018-07-10_MagRun_01.root"); // Opens the root file
+	TFile *f=new TFile("MuonData15.11-04.12.2018.root"); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
   TH1F* h_u = new TH1F("h_u","Up", 80,0,8);
@@ -101,15 +101,15 @@ void test_analysisv3_Aike(){
 //cout<<"i"<<endl;
   cout<<tr->GetEntries()<<endl;
   int countm =0;
-//The following is test code for making sure we can read data
   for (int i=0;i<tr->GetEntries();i++){
     tr->GetEntry(i);
+	//The following is test code for making sure we can read data
   //int countm =0;
   //cout<<"i"<<endl;
+
   //Indentify the last layer the muon passed through as layer_pass.
   //Muon decays between layer_pass and layer_pass+1
   //Discard events that dacays before the first layer or pass through the fifth layer
-
     Short_t Layer1=E03+E04+W03+W04;
     Short_t Layer2=E05+E06+W05+W06;
     Short_t Layer3=E07+E08+W07+W08;
@@ -119,27 +119,26 @@ void test_analysisv3_Aike(){
 
     Short_t layer_pass = 0;
 
-    if((W03 > 11 && E03 > 29) ||(W04 > 105 && E04 > 178)){
-      //layer_pass++;
+		//lower bound on muon energy to remove unphysical peak near 0
+    if((W03 > 70 && E03 > 68) ||(W04 > 160 && E04 > 224)){
       layer_pass = 1;
     }
-    if( ((W05 > 166 && E05 > 42) ||(W06 > 126 && E06 > 32))){
+    if( ((W05 > 220 && E05 > 81) ||(W06 > 200 && E06 > 73))){
       if(layer_pass==1){
       layer_pass = 2;}
       else{layer_pass = 0;}
     }
-    if(((W07 > 12 && E07 > 10) ||(W08 > 245 && E08 > 12))){
-      //layer_pass++;
+    if(((W07 > 47 && E07 > 45) ||(W08 > 285 && E08 > 45))){
       if(layer_pass==2){
       layer_pass = 3;}
       else{layer_pass = 0;}
     }
-    if( ((W09 > 14 && E09 > 2) ||(W10 > 16 && E10 > 42))){
+    if( ((W09 > 70 && E09 > 36) ||(W10 > 45 && E10 > 88))){
       if(layer_pass==3){
       layer_pass = 4;}
       else{layer_pass = 0;}
     }
-     if(((W11 > 10 && E11 > 17) ||(W12 > 221 && E12 > 120))){
+     if(((W11 > 50 && E11 > 17) ||(W12 > 276 && E12 > 120))){
       if(layer_pass==4){
       layer_pass = 5;}
       else{layer_pass = 0;}
@@ -166,29 +165,26 @@ void test_analysisv3_Aike(){
     //  continue;
     //}
     //else{cout<<layer_pass<<endl;}
+
+
   //Indentify the layer of electron hits
   //Reject events with more than one hit or no hit
   //cout<<"okay"<<endl;
     int layer_hit=0;
     int uptime=-1;
     int downtime=-1;
-    //int flag = 0;
     int count = 0;
     int hit_time[10]={STDC_W03,STDC_W04,STDC_W05,STDC_W06,STDC_W07,STDC_W08,STDC_W09,STDC_W10,STDC_W11,STDC_W12};
     for(int i = 1; i <= 4; ++i){
       if(i == layer_pass){
         for(int j = 2*i-1; j >= 0; j--){
           if(hit_time[j] < 4000){
-            //count ++;
             uptime = hit_time[j];
-            //break;
           }
         }
         for(int j = 2*i; j<=9; j++){
           if(hit_time[j] < 4000){
-            //count ++;
             downtime = hit_time[j];
-            //break;
           }
         }
       }
@@ -259,17 +255,11 @@ void test_analysisv3_Aike(){
       layer_hit = 5;
     }
 */
-    //if(count!=0){cout<<layer_hit<<" "<<layer_pass<<endl;}
-    //if (count > 1){countm++;}
     if(uptime>100&&downtime<0 && layer_pass != 5 && layer_pass != 0){
-      //cout<<time<<endl;
-      //cout<<i<<endl;
-      //cout<<layer_hit<<" "<<layer_pass<<endl;
       h_u->Fill(2.0/1000*uptime);
     }
 
     if(downtime>100&&uptime<0  && layer_pass != 5 && layer_pass != 0){
-      //cout<<time<<endl;
       h_d->Fill(2.0/1000*downtime);
     }
 
