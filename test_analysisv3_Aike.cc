@@ -284,7 +284,7 @@ void test_analysisv3_Aike(){
 
 	//fitting function for h_diff
 	//[0]N,[1]life time,[2]A,[3]ang freq,[4]phase,[5]offset
-  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 0, 8.0);
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
   myfitd->SetParameter(0,100);
   myfitd->SetParameter(1,2);
   myfitd->SetParameter(2,10);
@@ -318,41 +318,5 @@ void test_analysisv3_Aike(){
 	// h_d->setMarkerColor("red");
 	// UpDown->Add(h_d);
 	// UpDown->Draw("E");
-
-/*
-	for (int i=0;i<tr->GetEntries();i++){          // This will loop over all of the recorded events in chronological order
-		tr->GetEntry(i); // Sets the values of all of your variables for event number i
-		if(W03>20){
-			h1->Fill(W03);
-		}
-*/
-		/*
-		Now that we have the data for a particular event, you can start imposing conditions and processing data. Something like:
-
-		float Layer3 = E03 + W03;    //Add the inputs from a layer together
-		float Layer4 = E04 + W04;
-
-		if (Layer3>50 && Layer4>50){  //If layer 3 and 4 are above noise
-			TimeHist->Fill(STDC_E04); // Add a count to a histogram corresponting to the STDC value in layer 4
-		}
-
-
-
-		This example processing is only meant to give you an idea of the type of logic you'll use and the syntax involved.
-		Your code will be more complex and meaningful... I hope.
-}
-		*/
-
-
-	/*
-	for (int i=0;i<tr->GetEntries();i++){
-		tr->GetEntry(i);
-		h1a->Fill(W03 - h1->GetMaximumBin());
-	}
-	*/
-	//h1->Draw();
-
-
-
 
 }
