@@ -8,7 +8,6 @@ more abstractly, maybe make your detector layers into classes and give them attr
 
 
 
-#include <iostream>
 #include <string>
 #include "TFile.h"
 #include "TTree.h"
@@ -19,6 +18,7 @@ more abstractly, maybe make your detector layers into classes and give them attr
 #include <iostream>       // std::cout
 #include <deque>          // std::deque
 #include <list>
+#include <cmath>
 using namespace std;
 
 
@@ -30,6 +30,7 @@ void test_analysisv3_Aike(){
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
 	result->Clear();
+
 
 
 	TH1F* h_u1 = new TH1F("h_u1","Up", 80,0,8);
@@ -161,13 +162,13 @@ void test_analysisv3_Aike(){
 
   //Indentify the layer of electron hits
   //Reject events with more than one hit or no hit
-  //cout<<"okay"<<endl;
     int layer_hit=0;
     double uptime=0;
     double downtime=0;
     int countu = 0;
 		int countd = 0;
     int hit_time[10]={STDC_W03,STDC_W04,STDC_W05,STDC_W06,STDC_W07,STDC_W08,STDC_W09,STDC_W10,STDC_W11,STDC_W12};
+		//take average of up/down time
     for(int i = 1; i <= 4; ++i){
       if(i == layer_pass){
         for(int j = 2*i-1; j >= 0; j--){
@@ -179,6 +180,8 @@ void test_analysisv3_Aike(){
           }
         }
         for(int j = 2*i; j<=9; j++){
+					if (j==0 || j==1)
+						continue;
           if(hit_time[j] < 4000 && hit_time[j] > 2){
             downtime += hit_time[j];
 						countd++;
@@ -189,8 +192,8 @@ void test_analysisv3_Aike(){
 
 		uptime /= countu;
 		downtime /= countd;
-		//uptime>100&&downtime<1 &&
-    if(layer_pass != 5 && layer_pass != 0){
+		//uptime>100 && downtime<1 &&
+    if( layer_pass != 5 && layer_pass != 0){
 			switch (layer_pass) {
 				case 1:	h_u1->Fill(2.0/1000*uptime);
 				case 2: h_u2->Fill(2.0/1000*uptime);
@@ -199,7 +202,7 @@ void test_analysisv3_Aike(){
 			}
     }
 		//downtime>100&&uptime<1  &&
-    if( layer_pass != 5 && layer_pass != 0){
+		if( layer_pass != 5 && layer_pass != 0){
 			switch (layer_pass) {
 				case 1:	h_d1->Fill(2.0/1000*downtime);
 				case 2: h_d2->Fill(2.0/1000*downtime);
@@ -214,9 +217,13 @@ void test_analysisv3_Aike(){
 //This section analyze and plot data
 ////////////////////////////////////////
 	//rescale h_d
-   Double_t nu = h_u3->GetEntries();
-   Double_t nd = h_d3->GetEntries();
-   h_u3 -> Scale(nd/nu);
+   // Double_t nu = h_u3->GetEntries();
+   // Double_t nd = h_d3->GetEntries();
+   // h_u3 -> Scale(nd/nu);
+	 // nu = h_u2->GetEntries();
+   // nd = h_d2->GetEntries();
+   // h_u2 -> Scale(nd/nu);
+
 
 	//fitting function for h_u and h_d
   TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
@@ -235,29 +242,29 @@ void test_analysisv3_Aike(){
   myfitd->SetParameter(5,0);
 
 	//plot three histograms
-  result->Divide(3,2);
-	//plot h_u with fitting
-  result->cd(1);
-  // h_u->Fit("myfit");
-  h_u2->Draw("E");
-	//plot h_d with fitting
-  result->cd(2);
-  // h_d->Fit("myfit");
-  h_d2->Draw("E");
-
-	result->cd(4);
-	h_u3->Draw("E");
-	result->cd(5);
-	h_d3->Draw("E");
-
-	h_diff2->Add(h_u2);
-	h_diff2->Add(h_d2,-1);
-	h_diff3->Add(h_u3);
-	h_diff3->Add(h_d3,-1);
-	result->cd(3);
-	h_diff2->Draw("E");
-	result->cd(6);
-	h_diff3->Draw("E");
+  // result->Divide(3,2);
+	// //plot h_u with fitting
+  // result->cd(1);
+  // h_u2->Fit("myfit");
+  // h_u2->Draw("E");
+	// //plot h_d with fitting
+  // result->cd(2);
+  // h_d2->Fit("myfit");
+  // h_d2->Draw("E");
+	//
+	// result->cd(4);
+	// h_u3->Draw("E");
+	// result->cd(5);
+	// h_d3->Draw("E");
+	//
+	// h_diff2->Add(h_u2);
+	// h_diff2->Add(h_d2,-1);
+	// h_diff3->Add(h_u3);
+	// h_diff3->Add(h_d3,-1);
+	// result->cd(3);
+	// h_diff2->Draw("E");
+	// result->cd(6);
+	// h_diff3->Draw("E");
 
 	//plot hist_diff with oscillation fitting
   // result->cd(3);
@@ -275,5 +282,27 @@ void test_analysisv3_Aike(){
 	// h_d->setMarkerColor("red");
 	// UpDown->Add(h_d);
 	// UpDown->Draw("E");
+
+/////////////////////////////////
+// Experimental TGraphError
+/////////////////////////////////
+TCanvas *testcanvas=new TCanvas("graph with customized error bars","Up-Down");
+Double_t x[80];
+Double_t y[80];
+Double_t ex[80];
+Double_t ey[80];
+
+for (int i = 0; i < 80; i++){
+	x[i] = i*0.1;
+	y[i] = h_u3->GetBinContent(i) - h_d3->GetBinContent(i);
+	ex[i] = 0;
+	ey[i]= sqrt(h_u3->GetBinContent(i)) + sqrt(h_d3->GetBinContent(i));
+}
+
+gr = new TGraphErrors(80,x,y,ex,ey);
+gr->Draw("ALP");
+
+
+
 
 }
