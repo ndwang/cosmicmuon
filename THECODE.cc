@@ -1,9 +1,16 @@
 /*
-This script is the framework for you to start your analysis. I have written enough for you to access
-data from each event (Muon passing through/stopping in the detector) individually. With the data organized
-this way, you can make decisions about individual events and apply them to the entire data set. Feel free
-to make this analysis code as complex as you need it to be. Write functions so you can think about things
-more abstractly, maybe make your detector layers into classes and give them attributes and functions.
+This script analyzes a cosmic muon dataset to determine the precession frequency
+of muon and therefore the g factor. It first identifies decay events by
+checking the detector layers it passes through, then determines the direction of
+the decay (up/down). It records the decay time in two histograms for up/down.
+The decay time histograms are then fitted to exponential decay to determine muon
+lifetime. The script also calculates the difference between spin up/down, and
+determines the precession frequency of muon. Together with magnetic field data,
+we are able to calculate the g factor for muon.
+
+@Author: Chad
+				 Joy, Aike
+				 Nora Sherman, Ningdong Wang
 */
 
 
@@ -46,7 +53,6 @@ void test_analysisv3_Aike(){
 	TH1F* h_d4 = new TH1F("h_d4","Down",80,0,8);
   TH1F* h_diff4 = new TH1F("h_diff4","Diff", 80,0,8);
 
-//for (int event=0,event<tr->GetEntries();event++){
 
 	// These floats correspond to each PMT. You'll use these to hold
 	Short_t W01,W02,W03,W04,W05,W06,W07,W08,W09,W10,W11,W12,W13,W14;
@@ -121,13 +127,6 @@ void test_analysisv3_Aike(){
   //Indentify the last layer the muon passed through as layer_pass.
   //Muon decays between layer_pass and layer_pass+1
   //Discard events that dacays before the first layer or pass through the fifth layer
-    Short_t Layer1=E03+E04+W03+W04;
-    Short_t Layer2=E05+E06+W05+W06;
-    Short_t Layer3=E07+E08+W07+W08;
-    Short_t Layer4=E09+E10+W09+W10;
-    Short_t Layer5=E11+E12+W11+W12;
-
-
     Short_t layer_pass = 0;
 
 		//lower bound on muon energy to remove unphysical peak near 0
@@ -156,38 +155,66 @@ void test_analysisv3_Aike(){
     }
 
 
+	//
+
+
+
+
   //Indentify the layer of electron hits
   //Reject events with more than one hit or no hit
-    int layer_hit=0;
-    double uptime=0;
-    double downtime=0;
+    double uptime=-1;
+    double downtime=-1;
     int countu = 0;
 		int countd = 0;
     int hit_time[10]={STDC_W03,STDC_W04,STDC_W05,STDC_W06,STDC_W07,STDC_W08,STDC_W09,STDC_W10,STDC_W11,STDC_W12};
 		//take average of up/down time
-    for(int i = 1; i <= 4; ++i){
-      if(i == layer_pass){
-        for(int j = 2*i-1; j >= 0; j--){
-					if (j==0 || j==1)
-						continue;
-          if(hit_time[j] < 4000 && hit_time[j] > 2){
-            uptime += hit_time[j];
-						countu++;
-          }
-        }
-        for(int j = 2*i; j<=9; j++){
-					if (j==0 || j==1)
-						continue;
-          if(hit_time[j] < 4000 && hit_time[j] > 2){
-            downtime += hit_time[j];
-						countd++;
-          }
-        }
-      }
-    }
+    // for(int i = 1; i <= 4; ++i){
+    //   if(i == layer_pass){
+    //     for(int j = 2*i-1; j >= 0; j--){
+		// 			if (j==0 || j==1)
+		// 				continue;
+    //       if(hit_time[j] < 4000 && hit_time[j] > 2){
+    //         uptime += hit_time[j];
+		// 				countu++;
+    //       }
+    //     }
+    //     for(int j = 2*i; j<=9; j++){
+		// 			if (j==0 || j==1)
+		// 				continue;
+    //       if(hit_time[j] < 4000 && hit_time[j] > 2){
+    //         downtime += hit_time[j];
+		// 				countd++;
+    //       }
+    //     }
+    //   }
+    // }
+		// uptime /= countu;
+		// downtime /= countd;
 
-		uptime /= countu;
-		downtime /= countd;
+		if (layer_pass < 5 && layer_pass > 0){
+			for(int i = 1; i <= 4; ++i){
+	      if(i == layer_pass){
+	        for(int j = 2*i-1; j >= 0; j--){
+	          if(50<hit_time[j] && hit_time[j] < 4000){
+	            //count ++;
+	            uptime = hit_time[j];
+	            break;
+	          }
+	        }
+	        for(int j = 2*i; j<=9; j++){
+	          if(hit_time[j] < 4000 && 50<hit_time[j]){
+	            //count ++;
+	            downtime = hit_time[j];
+	            break;
+	          }
+	        }
+	      }
+	    }
+		}
+
+
+		// cout << "uptime: " << uptime << endl;
+		// cout << "downtime: " << downtime << endl;
 		//uptime>100 && downtime<1 &&
     if( layer_pass != 5 && layer_pass != 0){
 			switch (layer_pass) {
@@ -238,67 +265,59 @@ void test_analysisv3_Aike(){
   myfitd->SetParameter(5,0);
 
 	//plot three histograms
-  // result->Divide(3,2);
-	// //plot h_u with fitting
-  // result->cd(1);
-  // h_u2->Fit("myfit");
-  // h_u2->Draw("E");
-	// //plot h_d with fitting
-  // result->cd(2);
-  // h_d2->Fit("myfit");
-  // h_d2->Draw("E");
-	//
-	// result->cd(4);
-	// h_u3->Draw("E");
-	// result->cd(5);
-	// h_d3->Draw("E");
-	//
-	// h_diff2->Add(h_u2);
-	// h_diff2->Add(h_d2,-1);
-	// h_diff3->Add(h_u3);
-	// h_diff3->Add(h_d3,-1);
-	// result->cd(3);
-	// h_diff2->Draw("E");
-	// result->cd(6);
-	// h_diff3->Draw("E");
+  result->Divide(3,2);
+	//plot h_u with fitting
+  result->cd(1);
+  h_u2->Fit("myfit");
+  h_u2->Draw("E");
+	//plot h_d with fitting
+  result->cd(2);
+  h_d2->Fit("myfit");
+  h_d2->Draw("E");
 
-	//plot hist_diff with oscillation fitting
-  // result->cd(3);
-//  TH1* hist_diff = (TH1*) h1->Clone("hist_diff");
+	result->cd(4);
+	h_u3->Draw("E");
+	result->cd(5);
+	h_d3->Draw("E");
+
+	h_diff2->Add(h_u2);
+	h_diff2->Add(h_d2,-1);
+	h_diff3->Add(h_u3);
+	h_diff3->Add(h_d3,-1);
+	result->cd(3);
+	h_diff2->Fit("myfitd");
+	h_diff2->Draw("E");
+	result->cd(6);
+	h_diff3->Fit("myfitd");
+	h_diff3->Draw("E");
+
+	// plot hist_diff with oscillation fitting
+ //  result->cd(3);
+ // TH1* hist_diff = (TH1*) h1->Clone("hist_diff");
 	// h_diff->Add(h_u);
-  // h_diff->Add(h_d, -1);
-  // h_diff->Fit("myfitd","R");
-  // h_diff->Draw("E");
+ //  h_diff->Add(h_d, -1);
+ //  h_diff->Fit("myfitd","R");
+ //  h_diff->Draw("E");
 	// gStyle->SetOptFit(1111);  //show more fitting information
 
-	// result->cd(4);
-	// TH1F* UpDown =new TH1F("h2","Up and Down", 80,0,8);
-	// h_u->setMarkerColor("k");
-	// UpDown->Add(h_u);
-	// h_d->setMarkerColor("red");
-	// UpDown->Add(h_d);
-	// UpDown->Draw("E");
 
 /////////////////////////////////
-// Experimental TGraphError
+// Experimental TGraphError (customized error bars)
 /////////////////////////////////
-TCanvas *testcanvas=new TCanvas("graph with customized error bars","Up-Down");
-Double_t x[80];
-Double_t y[80];
-Double_t ex[80];
-Double_t ey[80];
-
-for (int i = 0; i < 80; i++){
-	x[i] = i*0.1;
-	y[i] = h_u3->GetBinContent(i) - h_d3->GetBinContent(i);
-	ex[i] = 0;
-	ey[i]= sqrt(h_u3->GetBinContent(i)) + sqrt(h_d3->GetBinContent(i));
-}
-
-gr = new TGraphErrors(80,x,y,ex,ey);
-gr->Draw("ALP");
-
-
-
+// TCanvas *testcanvas=new TCanvas("graph with customized error bars","Up-Down");
+// Double_t x[80];
+// Double_t y[80];
+// Double_t ex[80];
+// Double_t ey[80];
+//
+// for (int i = 0; i < 80; i++){
+// 	x[i] = i*0.1;
+// 	y[i] = h_u3->GetBinContent(i) - h_d3->GetBinContent(i);
+// 	ex[i] = 0;
+// 	ey[i]= sqrt(h_u3->GetBinContent(i)) + sqrt(h_d3->GetBinContent(i));
+// }
+//
+// gr = new TGraphErrors(80,x,y,ex,ey);
+// gr->Draw("ALP");
 
 }

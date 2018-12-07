@@ -13,7 +13,7 @@ using namespace std;
 string Path =  "/home/nw3/cosmicmuon";
 
 // Write the name of your file here without .root extension eg. MuonData1
-string FileName = "MuonData15.11-04.12.2018";
+string FileName = "RealData1";
 
 // These lines tack on the .root and .csv extensions for use in the function
 string RootFile =  FileName + ".root";
