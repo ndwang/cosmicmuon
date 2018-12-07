@@ -57,7 +57,8 @@ void test_analysisv3_Aike(){
 
 /////////////////////////////////////////
 // This section grabs the data from the branches in your root file
-// and assigns them to a variable (change &a to the relevant PMT, or however you prefer to refer to your inputs)
+// and assigns them to a variable (change &a to the relevant PMT
+// or however you prefer to refer to your inputs)
 /////////////////////////////////////////
 	tr->SetBranchAddress("ADC_1_0",&E03);
 	tr->SetBranchAddress("ADC_1_1",&W03);
@@ -79,8 +80,8 @@ void test_analysisv3_Aike(){
 	tr->SetBranchAddress("ADC_2_5",&W11);
 	tr->SetBranchAddress("ADC_2_6",&E12);
 	tr->SetBranchAddress("ADC_2_7",&W12);
-	// tr->SetBranchAddress("ADC_2_9",&E12);
-	// tr->SetBranchAddress("ADC_2_8",&E11);
+	//tr->SetBranchAddress("ADC_2_9",&E12);
+	//tr->SetBranchAddress("ADC_2_8",&E11);
 	//tr->SetBranchAddress("ADC_2_10",&E11);
 	//tr->SetBranchAddress("ADC_2_11",&E12);
 
@@ -94,33 +95,28 @@ void test_analysisv3_Aike(){
 	tr->SetBranchAddress("STDC_8_7",&STDC_W10);
 	tr->SetBranchAddress("STDC_8_8",&STDC_W11);
 	tr->SetBranchAddress("STDC_8_9",&STDC_W12);
-	/*tr->SetBranchAddress("STDC_8_10",&STDC_E03);
-	tr->SetBranchAddress("STDC_8_11",&STDC_E04);
-	tr->SetBranchAddress("STDC_8_12",&STDC_E05);
-	tr->SetBranchAddress("STDC_8_13",&STDC_E06);
-	tr->SetBranchAddress("STDC_8_14",&STDC_E07);
-	tr->SetBranchAddress("STDC_8_15",&STDC_E08);
-	tr->SetBranchAddress("STDC_8_SUM",&STDC_8_SUM);
+	// tr->SetBranchAddress("STDC_8_10",&STDC_E03);
+	// tr->SetBranchAddress("STDC_8_11",&STDC_E04);
+	// tr->SetBranchAddress("STDC_8_12",&STDC_E05);
+	// tr->SetBranchAddress("STDC_8_13",&STDC_E06);
+	// tr->SetBranchAddress("STDC_8_14",&STDC_E07);
+	// tr->SetBranchAddress("STDC_8_15",&STDC_E08);
+	// tr->SetBranchAddress("STDC_8_SUM",&STDC_8_SUM);
+	//
+	//
+	// tr->SetBranchAddress("FTDC_9_0",&FTDC_9_0);
+	// tr->SetBranchAddress("FTDC_9_1",&FTDC_9_1);
+	// tr->SetBranchAddress("FTDC_9_2",&FTDC_9_2);
+	// tr->SetBranchAddress("FTDC_9_3",&FTDC_9_3);
+	// tr->SetBranchAddress("FTDC_9_4",&FTDC_9_4);
+	// tr->SetBranchAddress("FTDC_9_5",&FTDC_9_5);
+	// tr->SetBranchAddress("FTDC_9_6",&FTDC_9_6);
+	// tr->SetBranchAddress("FTDC_9_7",&FTDC_9_7);
 
 
-	tr->SetBranchAddress("FTDC_9_0",&FTDC_9_0);
-	tr->SetBranchAddress("FTDC_9_1",&FTDC_9_1);
-	tr->SetBranchAddress("FTDC_9_2",&FTDC_9_2);
-	tr->SetBranchAddress("FTDC_9_3",&FTDC_9_3);
-	tr->SetBranchAddress("FTDC_9_4",&FTDC_9_4);
-	tr->SetBranchAddress("FTDC_9_5",&FTDC_9_5);
-	tr->SetBranchAddress("FTDC_9_6",&FTDC_9_6);
-	tr->SetBranchAddress("FTDC_9_7",&FTDC_9_7);
-*/
-
-//cout<<"i"<<endl;
   cout<<tr->GetEntries()<<endl;
-  int countm =0;
   for (int i=0;i<tr->GetEntries();i++){
     tr->GetEntry(i);
-	//The following is test code for making sure we can read data
-  //int countm =0;
-  //cout<<"i"<<endl;
 
   //Indentify the last layer the muon passed through as layer_pass.
   //Muon decays between layer_pass and layer_pass+1
