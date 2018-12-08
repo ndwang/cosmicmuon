@@ -53,6 +53,8 @@ void test_analysisv3_Aike(){
 	TH1F* h_d4 = new TH1F("h_d4","Down",80,0,8);
   TH1F* h_diff4 = new TH1F("h_diff4","Diff", 80,0,8);
 
+	TH1I* x_cor = new TH1I("x_cor","x coordinate", 500,-1000,1000);
+	TH1I* y_cor = new TH1I("y_cor","y coordinate", 500,-1000,1000);
 
 	// These floats correspond to each PMT. You'll use these to hold
 	Short_t W01,W02,W03,W04,W05,W06,W07,W08,W09,W10,W11,W12,W13,W14;
@@ -155,7 +157,23 @@ void test_analysisv3_Aike(){
     }
 
 
-	//
+	//determine the x,y location of muon
+	//accept events in the middle
+	if (layer_pass != 5 && layer_pass != 0){
+		int ADC[16]  = {W03,W04,E03,E04,W05,W06,E05,E06,W07,W08,E07,E08,W09,W10,E09,E10};
+		int left[2]  = {ADC[layer_pass*4-4],ADC[layer_pass*4-3]};
+		int right[2] = {ADC[layer_pass*4-2],ADC[layer_pass*4-1]};
+		// cout << "left:  " << left[0]  << " and " << left[1]  << endl;
+		// cout << "right: " << right[0] << " and " << right[1] << endl;
+
+		int x = left[0] + left[1] - right[0] - right[1];
+		int y = left[0] - left[1] + right[0] - right[1];
+
+		x_cor->Fill(x);
+		y_cor->Fill(y);
+
+	}
+
 
 
 
@@ -191,7 +209,7 @@ void test_analysisv3_Aike(){
 		// uptime /= countu;
 		// downtime /= countd;
 
-		if (layer_pass < 5 && layer_pass > 0){
+		if (layer_pass != 5 && layer_pass != 0){
 			for(int i = 1; i <= 4; ++i){
 	      if(i == layer_pass){
 	        for(int j = 2*i-1; j >= 0; j--){
@@ -248,48 +266,48 @@ void test_analysisv3_Aike(){
    // h_u2 -> Scale(nd/nu);
 
 
-	//fitting function for h_u and h_d
-  TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
-  myfit->SetParameter(0,100);
-  myfit->SetParameter(1,2); //[1] estimates muon lifetime
-  myfit->SetParameter(2,0);
-
-	//fitting function for h_diff
-	//[0]N,[1]life time,[2]A,[3]ang freq,[4]phase,[5]offset
-  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
-  myfitd->SetParameter(0,100);
-  myfitd->SetParameter(1,2);
-  myfitd->SetParameter(2,10);
-  myfitd->SetParameter(3,0.6);
-	myfitd->SetParameter(4,0);
-  myfitd->SetParameter(5,0);
-
-	//plot three histograms
-  result->Divide(3,2);
-	//plot h_u with fitting
-  result->cd(1);
-  h_u2->Fit("myfit");
-  h_u2->Draw("E");
-	//plot h_d with fitting
-  result->cd(2);
-  h_d2->Fit("myfit");
-  h_d2->Draw("E");
-
-	result->cd(4);
-	h_u3->Draw("E");
-	result->cd(5);
-	h_d3->Draw("E");
-
-	h_diff2->Add(h_u2);
-	h_diff2->Add(h_d2,-1);
-	h_diff3->Add(h_u3);
-	h_diff3->Add(h_d3,-1);
-	result->cd(3);
-	h_diff2->Fit("myfitd");
-	h_diff2->Draw("E");
-	result->cd(6);
-	h_diff3->Fit("myfitd");
-	h_diff3->Draw("E");
+	// //fitting function for h_u and h_d
+  // TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
+  // myfit->SetParameter(0,100);
+  // myfit->SetParameter(1,2); //[1] estimates muon lifetime
+  // myfit->SetParameter(2,0);
+	//
+	// //fitting function for h_diff
+	// //[0]N,[1]life time,[2]A,[3]ang freq,[4]phase,[5]offset
+  // TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
+  // myfitd->SetParameter(0,100);
+  // myfitd->SetParameter(1,2);
+  // myfitd->SetParameter(2,10);
+  // myfitd->SetParameter(3,0.6);
+	// myfitd->SetParameter(4,0);
+  // myfitd->SetParameter(5,0);
+	//
+	// //plot three histograms
+  // result->Divide(3,2);
+	// //plot h_u with fitting
+  // result->cd(1);
+  // h_u2->Fit("myfit");
+  // h_u2->Draw("E");
+	// //plot h_d with fitting
+  // result->cd(2);
+  // h_d2->Fit("myfit");
+  // h_d2->Draw("E");
+	//
+	// result->cd(4);
+	// h_u3->Draw("E");
+	// result->cd(5);
+	// h_d3->Draw("E");
+	//
+	// h_diff2->Add(h_u2);
+	// h_diff2->Add(h_d2,-1);
+	// h_diff3->Add(h_u3);
+	// h_diff3->Add(h_d3,-1);
+	// result->cd(3);
+	// h_diff2->Fit("myfitd");
+	// h_diff2->Draw("E");
+	// result->cd(6);
+	// h_diff3->Fit("myfitd");
+	// h_diff3->Draw("E");
 
 	// plot hist_diff with oscillation fitting
  //  result->cd(3);
@@ -320,4 +338,9 @@ void test_analysisv3_Aike(){
 // gr = new TGraphErrors(80,x,y,ex,ey);
 // gr->Draw("ALP");
 
+result->Divide(1,2);
+result->cd(1);
+x_cor->Draw("ALP");
+result->cd(2);
+y_cor->Draw("ALP");
 }
