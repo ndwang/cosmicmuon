@@ -176,25 +176,25 @@ void THECODE(){
 
 	//determine the x,y location of muon
 	//accept events in the middle
-	// if (layer_pass != 5 && layer_pass != 0){
-	// 	int ADC[16]  = {W03,W04,E03,E04,W05,W06,E05,E06,W07,W08,E07,E08,W09,W10,E09,E10};
-	// 	//normalize ADCs
-	// 	double left[2];
-	// 	double right[2];
-	// 	left[0] = (ADC[layer_pass*4-4]-normalization[layer_pass*4-4][0])*normalization[0][1]/(normalization[layer_pass*4-4][1]);
-	// 	left[1] = (ADC[layer_pass*4-3]-normalization[layer_pass*4-3][0])*normalization[0][1]/(normalization[layer_pass*4-3][1]);
-	// 	right[0] = (ADC[layer_pass*4-2]-normalization[layer_pass*4-2][0])*normalization[0][1]/(normalization[layer_pass*4-2][1]);
-	// 	right[1] = (ADC[layer_pass*4-1]-normalization[layer_pass*4-1][0])*normalization[0][1]/(normalization[layer_pass*4-1][1]);
-	//
-	// 	double x = left[0] + left[1] - right[0] - right[1];
-	// 	double y = left[0] - left[1] + right[0] - right[1];
-	//
-	// 	// if (left[0] > 300 || left[1] > 300 || right[0] > 300 || right[1] > 300){
-	// 	// 	x_cor->Fill(x);
-	// 	// 	y_cor->Fill(y);
-	// 	// }
-	// 	if (x > 400 || x < -200){continue;}
-	// }
+	if (layer_pass != 5 && layer_pass != 0){
+		int ADC[16]  = {W03,W04,E03,E04,W05,W06,E05,E06,W07,W08,E07,E08,W09,W10,E09,E10};
+		//normalize ADCs
+		double left[2];
+		double right[2];
+		left[0] = (ADC[layer_pass*4-4]-normalization[layer_pass*4-4][0])*normalization[0][1]/(normalization[layer_pass*4-4][1]);
+		left[1] = (ADC[layer_pass*4-3]-normalization[layer_pass*4-3][0])*normalization[0][1]/(normalization[layer_pass*4-3][1]);
+		right[0] = (ADC[layer_pass*4-2]-normalization[layer_pass*4-2][0])*normalization[0][1]/(normalization[layer_pass*4-2][1]);
+		right[1] = (ADC[layer_pass*4-1]-normalization[layer_pass*4-1][0])*normalization[0][1]/(normalization[layer_pass*4-1][1]);
+
+		double x = left[0] + left[1] - right[0] - right[1];
+		double y = left[0] - left[1] + right[0] - right[1];
+
+		// if (left[0] > 300 || left[1] > 300 || right[0] > 300 || right[1] > 300){
+		// 	x_cor->Fill(x);
+		// 	y_cor->Fill(y);
+		// }
+		if (x > 400 || x < -200){continue;}
+	}
 
 
 
@@ -234,7 +234,7 @@ void THECODE(){
 		if (layer_pass != 5 && layer_pass != 0){
 			for(int i = 1; i <= 4; ++i){
 	      if(i == layer_pass){
-	        for(int j = 2*i-1; j >= 0; j--){
+	        for(int j = 2*i-1; j >= 2; j--){
 	          if(50<hit_time[j] && hit_time[j] < 4000){
 	            //count ++;
 	            uptime = hit_time[j];
@@ -255,8 +255,8 @@ void THECODE(){
 
 		// cout << "uptime: " << uptime << endl;
 		// cout << "downtime: " << downtime << endl;
-		//uptime>100 && downtime<1 &&
-    if( layer_pass != 5 && layer_pass != 0){
+
+    if(uptime>100 && downtime<1 && layer_pass != 5 && layer_pass != 0){
 			switch (layer_pass) {
 				case 1:	h_u1->Fill(2.0/1000*uptime);
 				case 2: h_u2->Fill(2.0/1000*uptime);
@@ -264,8 +264,8 @@ void THECODE(){
 				case 4: h_u4->Fill(2.0/1000*uptime);
 			}
     }
-		//downtime>100&&uptime<1  &&
-		if( layer_pass != 5 && layer_pass != 0){
+
+		if(downtime>100&&uptime<1  && layer_pass != 5 && layer_pass != 0){
 			switch (layer_pass) {
 				case 1:	h_d1->Fill(2.0/1000*downtime);
 				case 2: h_d2->Fill(2.0/1000*downtime);
@@ -280,12 +280,15 @@ void THECODE(){
 //This section analyze and plot data
 ////////////////////////////////////////
 	//rescale h_d
-   // Double_t nu = h_u3->GetBinContent(0);
-   // Double_t nd = h_d3->GetBinContent(0);
-   // h_d3 -> Scale(nu/nd);
-	 // nu = h_u2->GetBinContent(1);
-   // nd = h_d2->GetBinContent(1);
-   // h_u2 -> Scale(nd/nu);
+   Double_t nu = h_u2->GetEntries();
+   Double_t nd = h_d2->GetEntries();
+   h_u2 -> Scale(nd/nu);
+	 nu = h_u3->GetEntries();
+   nd = h_d3->GetEntries();
+   h_u3 -> Scale(nd/nu);
+	 nu = h_u4->GetEntries();
+   nd = h_d4->GetEntries();
+   h_u4 -> Scale(nd/nu);
 
 
 	//fitting function for h_u and h_d
@@ -298,13 +301,14 @@ void THECODE(){
   myfit->SetParameter(5,0);
 
 	//fitting function for h_diff
-  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4, 8);
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*cos([2]*x+[3])+[4]", 4, 8);
 	myfitd->SetParameter(0,100);
-  myfitd->SetParameter(1,2);
-  myfitd->SetParameter(2,10);
-  myfitd->SetParameter(3,4);
-	myfitd->SetParameter(4,0);
-  myfitd->SetParameter(5,0);
+  // myfitd->SetParameter(1,2);
+	myfitd->FixParameter(1,2);
+  myfitd->SetParameter(2,4);
+	myfitd->SetParLimits(2,3,6);
+	myfitd->SetParameter(3,0);
+  myfitd->SetParameter(4,0);
 
 	//plot three histograms
   result->Divide(3,4);
@@ -320,7 +324,7 @@ void THECODE(){
 	result->cd(3);
 	h_diff1->Add(h_u1);
 	h_diff1->Add(h_d1,-1);
-	h_diff1->Fit("myfitd");
+	// h_diff1->Fit("myfitd");
 	h_diff1->Draw("E");
 
 	//plot h_u2 with fitting
