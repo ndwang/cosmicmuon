@@ -8,9 +8,9 @@ lifetime. The script also calculates the difference between spin up/down, and
 determines the precession frequency of muon. Together with magnetic field data,
 we are able to calculate the g factor for muon.
 
-@Author: Chad
-				 Joy, Aike
-				 Nora Sherman, Ningdong Wang
+@Author: Nora Sherman, Ningdong Wang
+				 TA: Chad
+				 With code from Joy and Aike
 */
 
 
@@ -42,7 +42,7 @@ void THECODE(){
 	result->Clear();
 
 
-
+	//histograms we will use
 	TH1F* h_u1 = new TH1F("h_u1","Up", 80,0,8);
 	TH1F* h_d1 = new TH1F("h_d1","Down",80,0,8);
   TH1F* h_diff1 = new TH1F("h_diff1","Diff", 80,0,8);
@@ -82,8 +82,8 @@ void THECODE(){
 
 
 /////////////////////////////////////////
-// This section grabs the data from the branches in your root file
-// and assigns them to a variable
+// This section grabs the data from the branches in
+// the root file and assigns them to a variable
 /////////////////////////////////////////
 	tr->SetBranchAddress("ADC_1_0",&E03);
 	tr->SetBranchAddress("ADC_1_1",&W03);
@@ -138,8 +138,15 @@ void THECODE(){
 	// tr->SetBranchAddress("FTDC_9_6",&FTDC_9_6);
 	// tr->SetBranchAddress("FTDC_9_7",&FTDC_9_7);
 
-
+	//print the number of entries
   cout<<tr->GetEntries()<<endl;
+
+
+	/////////////////////////
+	//        !!!!!!!        //
+	// MAIN LOOP STARTS HERE //
+	//        !!!!!!!        //
+	/////////////////////////
   for (int i=0;i<tr->GetEntries();i++){
     tr->GetEntry(i);
 
@@ -189,6 +196,7 @@ void THECODE(){
 		double x = left[0] + left[1] - right[0] - right[1];
 		double y = left[0] - left[1] + right[0] - right[1];
 
+		// Print out a histogram of x&y coordinates
 		// if (left[0] > 300 || left[1] > 300 || right[0] > 300 || right[1] > 300){
 		// 	x_cor->Fill(x);
 		// 	y_cor->Fill(y);
@@ -200,8 +208,7 @@ void THECODE(){
 
 
 
-  //Indentify the layer of electron hits
-  //Reject events with more than one hit or no hit
+  //Indentify the layer positron hits
     double uptime=-1;
     double downtime=-1;
     int countu = 0;
@@ -282,13 +289,16 @@ void THECODE(){
 	//rescale h_d
    Double_t nu = h_u2->GetEntries();
    Double_t nd = h_d2->GetEntries();
-   h_u2 -> Scale(nd/nu);
+	 TH1* h_uc2 = (TH1*) h_u2->Clone("h_u2 copy");
+   h_uc2 -> Scale(nd/nu);
 	 nu = h_u3->GetEntries();
    nd = h_d3->GetEntries();
-   h_u3 -> Scale(nd/nu);
+	 TH1* h_uc3 = (TH1*) h_u3->Clone("h_u3 copy");
+   h_uc3 -> Scale(nd/nu);
 	 nu = h_u4->GetEntries();
    nd = h_d4->GetEntries();
-   h_u4 -> Scale(nd/nu);
+	 TH1* h_uc4 = (TH1*) h_u4->Clone("h_u4 copy");
+   h_uc4 -> Scale(nd/nu);
 
 
 	//fitting function for h_u and h_d
@@ -311,63 +321,63 @@ void THECODE(){
   myfitd->SetParameter(4,0);
 
 	//plot three histograms
-  result->Divide(3,4);
-	//plot h_u1 with fitting
-  result->cd(1);
-  h_u1->Fit("myfit");
-  h_u1->Draw("E");
-	//plot h_d1 with fitting
-  result->cd(2);
-  h_d1->Fit("myfit");
-  h_d1->Draw("E");
-	//plot h_diff1 with fitting
-	result->cd(3);
-	h_diff1->Add(h_u1);
-	h_diff1->Add(h_d1,-1);
-	// h_diff1->Fit("myfitd");
-	h_diff1->Draw("E");
+  result->Divide(3,3);
+	// //plot h_u1 with fitting
+  // result->cd(1);
+  // h_u1->Fit("myfit");
+  // h_u1->Draw("E");
+	// //plot h_d1 with fitting
+  // result->cd(2);
+  // h_d1->Fit("myfit");
+  // h_d1->Draw("E");
+	// //plot h_diff1 with fitting
+	// result->cd(3);
+	// h_diff1->Add(h_u1);
+	// h_diff1->Add(h_d1,-1);
+	// // h_diff1->Fit("myfitd");
+	// h_diff1->Draw("E");
 
 	//plot h_u2 with fitting
-  result->cd(4);
+  result->cd(1);
   h_u2->Fit("myfit");
   h_u2->Draw("E");
 	//plot h_d2 with fitting
-  result->cd(5);
+  result->cd(2);
   h_d2->Fit("myfit");
   h_d2->Draw("E");
 	//plot h_diff2 with fitting
-	result->cd(6);
-	h_diff2->Add(h_u2);
+	result->cd(3);
+	h_diff2->Add(h_uc2);
 	h_diff2->Add(h_d2,-1);
 	h_diff2->Fit("myfitd");
 	h_diff2->Draw("E");
 
 	//plot h_u3 with fitting
-  result->cd(7);
+  result->cd(4);
   h_u3->Fit("myfit");
   h_u3->Draw("E");
 	//plot h_d3 with fitting
-  result->cd(8);
+  result->cd(5);
   h_d3->Fit("myfit");
   h_d3->Draw("E");
 	//plot h_diff3 with fitting
-	result->cd(9);
-	h_diff3->Add(h_u3);
+	result->cd(6);
+	h_diff3->Add(h_uc3);
 	h_diff3->Add(h_d3,-1);
 	h_diff3->Fit("myfitd");
 	h_diff3->Draw("E");
 
 	//plot h_u4 with fitting
-  result->cd(10);
+  result->cd(7);
   h_u4->Fit("myfit");
   h_u4->Draw("E");
 	//plot h_d4 with fitting
-  result->cd(11);
+  result->cd(8);
   h_d4->Fit("myfit");
   h_d4->Draw("E");
 	//plot h_diff4 with fitting
-	result->cd(12);
-	h_diff4->Add(h_u4);
+	result->cd(9);
+	h_diff4->Add(h_uc4);
 	h_diff4->Add(h_d4,-1);
 	h_diff4->Fit("myfitd");
 	h_diff4->Draw("E");
