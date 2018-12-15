@@ -33,7 +33,7 @@ void ChadCode(){
 
 	ofstream myfile; // Creates and output file object
 	myfile.open(csvFile.c_str()); // Opens a csv file to write to with your file name
-	myfile<<"Name, x-Offset, MPV, Width"<<endl; // Header data for the top of the .csv
+	// myfile<<"Name, x-Offset, MPV, Width"<<endl; // Header data for the top of the .csv
 
 
 	// Loop over module and channel
@@ -61,7 +61,8 @@ void ChadCode(){
 			p++; // Increment p by 1 so we don't keep drawing on the same pad
 			if(p<22){  // The last few channels aren't used and fitting a channel without data causes problems, so I excluded channels over 21
 				h1->Fit("fit","SAME q"); // Fit the data in the histogram with the TF1 we created earlier (landau)
-				myfile<<"ADC_"<<Mod<<"_"<<ch<<", "<<offset<<", "<<f1->GetParameter(1)<<", "<<f1->GetParameter(2)<<endl;  // Save the fit parameters to the .csv
+				// myfile<<"ADC_"<<Mod<<"_"<<ch<<", "<<offset<<", "<<f1->GetParameter(1)<<", "<<f1->GetParameter(2)<<endl;  // Save the fit parameters to the .csv
+				myfile<<offset<<endl<<f1->GetParameter(1)<<endl;  // Save the fit parameters to the .csv
 				}
 			h1->DrawCopy(); // Draws a copy of the histogram that will remain static so we can reuse the same histogram for other channels
 			delete h1;  // Delete the histogram

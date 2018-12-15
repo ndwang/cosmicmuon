@@ -29,11 +29,14 @@ we are able to calculate the g factor for muon.
 using namespace std;
 
 
+string FileName = "MuonData15.11-04.12.2018";
+string RootFile =  FileName + ".root";
+string csvFile = FileName + ".csv";
 
 
-void test_analysisv3_Aike(){
+void THECODE(){
 	//initialization
-	TFile *f=new TFile("MuonData15.11-04.12.2018.root"); // Opens the root file
+	TFile *f=new TFile(RootFile.c_str()); // Opens the root file
 	TTree *tr=(TTree*)f->Get("tree"); // Pulls the tree from the file into memory so we can work with it
 	TCanvas *result=new TCanvas("result","Up-Down");
 	result->Clear();
@@ -53,8 +56,8 @@ void test_analysisv3_Aike(){
 	TH1F* h_d4 = new TH1F("h_d4","Down",80,0,8);
   TH1F* h_diff4 = new TH1F("h_diff4","Diff", 80,0,8);
 
-	TH1I* x_cor = new TH1I("x_cor","x coordinate", 500,-1000,1000);
-	TH1I* y_cor = new TH1I("y_cor","y coordinate", 500,-1000,1000);
+	// TH1D* x_cor = new TH1D("x_cor","x coordinate", 200,-3000,3000);
+	// TH1D* y_cor = new TH1D("y_cor","y coordinate", 200,-3000,3000);
 
 	// These floats correspond to each PMT. You'll use these to hold
 	Short_t W01,W02,W03,W04,W05,W06,W07,W08,W09,W10,W11,W12,W13,W14;
@@ -63,10 +66,24 @@ void test_analysisv3_Aike(){
 	Short_t STDC_E03,STDC_E04,STDC_E05,STDC_E06,STDC_E07,STDC_E08,STDC_E09,STDC_E10,STDC_E11,STDC_E12;
 	Short_t STDC_8_SUM;
 
+//////////////////////////
+// Read ADC normalization parameters from file
+//////////////////////////
+	string s;
+	ifstream infile;
+	double normalization[12][2];
+	infile.open(csvFile.c_str());
+	for (int i = 0; i < 12; i++){
+		for (int j = 0; j < 2; j++){
+			getline(infile,s);
+			normalization[i][j] = stod(s,NULL);
+		}
+	}
+
+
 /////////////////////////////////////////
 // This section grabs the data from the branches in your root file
-// and assigns them to a variable (change &a to the relevant PMT
-// or however you prefer to refer to your inputs)
+// and assigns them to a variable
 /////////////////////////////////////////
 	tr->SetBranchAddress("ADC_1_0",&E03);
 	tr->SetBranchAddress("ADC_1_1",&W03);
@@ -159,20 +176,25 @@ void test_analysisv3_Aike(){
 
 	//determine the x,y location of muon
 	//accept events in the middle
-	if (layer_pass != 5 && layer_pass != 0){
-		int ADC[16]  = {W03,W04,E03,E04,W05,W06,E05,E06,W07,W08,E07,E08,W09,W10,E09,E10};
-		int left[2]  = {ADC[layer_pass*4-4],ADC[layer_pass*4-3]};
-		int right[2] = {ADC[layer_pass*4-2],ADC[layer_pass*4-1]};
-		// cout << "left:  " << left[0]  << " and " << left[1]  << endl;
-		// cout << "right: " << right[0] << " and " << right[1] << endl;
-
-		int x = left[0] + left[1] - right[0] - right[1];
-		int y = left[0] - left[1] + right[0] - right[1];
-
-		x_cor->Fill(x);
-		y_cor->Fill(y);
-
-	}
+	// if (layer_pass != 5 && layer_pass != 0){
+	// 	int ADC[16]  = {W03,W04,E03,E04,W05,W06,E05,E06,W07,W08,E07,E08,W09,W10,E09,E10};
+	// 	//normalize ADCs
+	// 	double left[2];
+	// 	double right[2];
+	// 	left[0] = (ADC[layer_pass*4-4]-normalization[layer_pass*4-4][0])*normalization[0][1]/(normalization[layer_pass*4-4][1]);
+	// 	left[1] = (ADC[layer_pass*4-3]-normalization[layer_pass*4-3][0])*normalization[0][1]/(normalization[layer_pass*4-3][1]);
+	// 	right[0] = (ADC[layer_pass*4-2]-normalization[layer_pass*4-2][0])*normalization[0][1]/(normalization[layer_pass*4-2][1]);
+	// 	right[1] = (ADC[layer_pass*4-1]-normalization[layer_pass*4-1][0])*normalization[0][1]/(normalization[layer_pass*4-1][1]);
+	//
+	// 	double x = left[0] + left[1] - right[0] - right[1];
+	// 	double y = left[0] - left[1] + right[0] - right[1];
+	//
+	// 	// if (left[0] > 300 || left[1] > 300 || right[0] > 300 || right[1] > 300){
+	// 	// 	x_cor->Fill(x);
+	// 	// 	y_cor->Fill(y);
+	// 	// }
+	// 	if (x > 400 || x < -200){continue;}
+	// }
 
 
 
@@ -258,65 +280,96 @@ void test_analysisv3_Aike(){
 //This section analyze and plot data
 ////////////////////////////////////////
 	//rescale h_d
-   // Double_t nu = h_u3->GetEntries();
-   // Double_t nd = h_d3->GetEntries();
-   // h_u3 -> Scale(nd/nu);
-	 // nu = h_u2->GetEntries();
-   // nd = h_d2->GetEntries();
+   // Double_t nu = h_u3->GetBinContent(0);
+   // Double_t nd = h_d3->GetBinContent(0);
+   // h_d3 -> Scale(nu/nd);
+	 // nu = h_u2->GetBinContent(1);
+   // nd = h_d2->GetBinContent(1);
    // h_u2 -> Scale(nd/nu);
 
 
-	// //fitting function for h_u and h_d
-  // TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])+[2]", 0, 8);
-  // myfit->SetParameter(0,100);
-  // myfit->SetParameter(1,2); //[1] estimates muon lifetime
-  // myfit->SetParameter(2,0);
-	//
-	// //fitting function for h_diff
-	// //[0]N,[1]life time,[2]A,[3]ang freq,[4]phase,[5]offset
-  // TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4.0, 8.0);
-  // myfitd->SetParameter(0,100);
-  // myfitd->SetParameter(1,2);
-  // myfitd->SetParameter(2,10);
-  // myfitd->SetParameter(3,0.6);
-	// myfitd->SetParameter(4,0);
-  // myfitd->SetParameter(5,0);
-	//
-	// //plot three histograms
-  // result->Divide(3,2);
-	// //plot h_u with fitting
-  // result->cd(1);
-  // h_u2->Fit("myfit");
-  // h_u2->Draw("E");
-	// //plot h_d with fitting
-  // result->cd(2);
-  // h_d2->Fit("myfit");
-  // h_d2->Draw("E");
-	//
-	// result->cd(4);
-	// h_u3->Draw("E");
-	// result->cd(5);
-	// h_d3->Draw("E");
-	//
-	// h_diff2->Add(h_u2);
-	// h_diff2->Add(h_d2,-1);
-	// h_diff3->Add(h_u3);
-	// h_diff3->Add(h_d3,-1);
-	// result->cd(3);
-	// h_diff2->Fit("myfitd");
-	// h_diff2->Draw("E");
-	// result->cd(6);
-	// h_diff3->Fit("myfitd");
-	// h_diff3->Draw("E");
+	//fitting function for h_u and h_d
+  TF1 *myfit = new TF1("myfit","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 0, 8);
+	myfit->SetParameter(0,100);
+  myfit->SetParameter(1,2);
+  myfit->SetParameter(2,10);
+  myfit->SetParameter(3,4);
+	myfit->SetParameter(4,0);
+  myfit->SetParameter(5,0);
 
-	// plot hist_diff with oscillation fitting
- //  result->cd(3);
- // TH1* hist_diff = (TH1*) h1->Clone("hist_diff");
-	// h_diff->Add(h_u);
- //  h_diff->Add(h_d, -1);
- //  h_diff->Fit("myfitd","R");
- //  h_diff->Draw("E");
-	// gStyle->SetOptFit(1111);  //show more fitting information
+	//fitting function for h_diff
+  TF1 *myfitd = new TF1("myfitd","[0]*exp(-x/[1])*(1+[2]*cos([3]*x+[4]))+[5]", 4, 8);
+	myfitd->SetParameter(0,100);
+  myfitd->SetParameter(1,2);
+  myfitd->SetParameter(2,10);
+  myfitd->SetParameter(3,4);
+	myfitd->SetParameter(4,0);
+  myfitd->SetParameter(5,0);
+
+	//plot three histograms
+  result->Divide(3,4);
+	//plot h_u1 with fitting
+  result->cd(1);
+  h_u1->Fit("myfit");
+  h_u1->Draw("E");
+	//plot h_d1 with fitting
+  result->cd(2);
+  h_d1->Fit("myfit");
+  h_d1->Draw("E");
+	//plot h_diff1 with fitting
+	result->cd(3);
+	h_diff1->Add(h_u1);
+	h_diff1->Add(h_d1,-1);
+	h_diff1->Fit("myfitd");
+	h_diff1->Draw("E");
+
+	//plot h_u2 with fitting
+  result->cd(4);
+  h_u2->Fit("myfit");
+  h_u2->Draw("E");
+	//plot h_d2 with fitting
+  result->cd(5);
+  h_d2->Fit("myfit");
+  h_d2->Draw("E");
+	//plot h_diff2 with fitting
+	result->cd(6);
+	h_diff2->Add(h_u2);
+	h_diff2->Add(h_d2,-1);
+	h_diff2->Fit("myfitd");
+	h_diff2->Draw("E");
+
+	//plot h_u3 with fitting
+  result->cd(7);
+  h_u3->Fit("myfit");
+  h_u3->Draw("E");
+	//plot h_d3 with fitting
+  result->cd(8);
+  h_d3->Fit("myfit");
+  h_d3->Draw("E");
+	//plot h_diff3 with fitting
+	result->cd(9);
+	h_diff3->Add(h_u3);
+	h_diff3->Add(h_d3,-1);
+	h_diff3->Fit("myfitd");
+	h_diff3->Draw("E");
+
+	//plot h_u4 with fitting
+  result->cd(10);
+  h_u4->Fit("myfit");
+  h_u4->Draw("E");
+	//plot h_d4 with fitting
+  result->cd(11);
+  h_d4->Fit("myfit");
+  h_d4->Draw("E");
+	//plot h_diff4 with fitting
+	result->cd(12);
+	h_diff4->Add(h_u4);
+	h_diff4->Add(h_d4,-1);
+	h_diff4->Fit("myfitd");
+	h_diff4->Draw("E");
+
+
+	gStyle->SetOptFit(1111);  //show more fitting information
 
 
 /////////////////////////////////
@@ -338,9 +391,9 @@ void test_analysisv3_Aike(){
 // gr = new TGraphErrors(80,x,y,ex,ey);
 // gr->Draw("ALP");
 
-result->Divide(1,2);
-result->cd(1);
-x_cor->Draw("ALP");
-result->cd(2);
-y_cor->Draw("ALP");
+// result->Divide(1,2);
+// result->cd(1);
+// x_cor->Draw("");
+// result->cd(2);
+// y_cor->Draw("");
 }
